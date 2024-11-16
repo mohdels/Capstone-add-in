@@ -25,9 +25,9 @@ export async function run() {
 
   //addNewCategoryToList()
   //removeCategoryFromList()
-  //retrieveCategoriesInList();
+  retrieveCategoriesInList();
   //setCategoryOfCurrentEmail();
-  removeCategoryFromEmail();
+  //removeCategoryFromEmail();
   getCategoryOfCurrentEmail();
 }
 
