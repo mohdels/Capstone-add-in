@@ -12,7 +12,18 @@ export async function run() {
   /**
    * Insert your Outlook code here to retrieve and display categories
    */
+  //getSubjectOfCurrentEmail();
+  
 
+  //addNewCategoryToList()
+  //removeCategoryFromList()
+  retrieveCategoriesInList();
+  //setCategoryOfCurrentEmail();
+  //removeCategoryFromEmail();
+  getCategoryOfCurrentEmail();
+}
+
+function getSubjectOfCurrentEmail() {
   const item = Office.context.mailbox.item;
   
   // Display the subject of the current item
@@ -22,13 +33,6 @@ export async function run() {
   insertAt.appendChild(document.createElement("br"));
   insertAt.appendChild(document.createTextNode(item.subject));
   insertAt.appendChild(document.createElement("br"));
-
-  //addNewCategoryToList()
-  //removeCategoryFromList()
-  retrieveCategoriesInList();
-  //setCategoryOfCurrentEmail();
-  //removeCategoryFromEmail();
-  getCategoryOfCurrentEmail();
 }
 
 function addNewCategoryToList() {
@@ -74,14 +78,14 @@ function retrieveCategoriesInList() {
       categoryDisplay.innerHTML = "";
       
       // Add a header
-      let header = document.createElement("b").appendChild(document.createTextNode("Categories:"));
+      let header = document.createElement("b").appendChild(document.createTextNode("Categories available:"));
       categoryDisplay.appendChild(header);
       categoryDisplay.appendChild(document.createElement("br"));
 
       // Loop through the categories and display each one
       categories.forEach((category) => {
         let categoryNode = document.createElement("div");
-        categoryNode.textContent = `Name: ${category.displayName}, Color: ${category.color}`;
+        categoryNode.textContent = `Name: ${category.displayName}`;
         categoryDisplay.appendChild(categoryNode);
       });
     } else {
