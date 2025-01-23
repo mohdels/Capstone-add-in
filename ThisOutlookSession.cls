@@ -8,41 +8,59 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
-    Dim ns As Object
-    Dim objMail As Object
-    Dim categories As Outlook.categories
-    Dim firstCategory As Outlook.category
+    Dim ns As Outlook.NameSpace
+    Dim objMail As Outlook.MailItem
     Dim entryIDs() As String
-    Dim i As Integer
-    
-    ' Split the EntryID collection into individual EntryIDs (in case more than one email comes in at once)
-    entryIDs = Split(EntryIDCollection, ",")
-    
-    ' Get MAPI namespace (used to access Outlook data)
-    Set ns = Application.GetNamespace("MAPI")
-    
-    ' Retrieve the list of categories defined in Outlook
-    Set categories = Application.Session.categories
+    Dim i As Long
+    Dim csvFilePath As String
+    Dim fso As Object
+    Dim csvFile As Object
+    Dim csvLine As String
 
-    ' Loop through each EntryID in the collection (using a For loop)
-    For i = 0 To UBound(entryIDs)
+    ' Set the path for the CSV file relative to the user's Documents folder
+    csvFilePath = Environ("USERPROFILE") & "\Documents\Emails.csv"
+
+    ' Split the EntryIDCollection into an array
+    entryIDs = Split(EntryIDCollection, ",")
+
+    ' Get the Outlook namespace
+    Set ns = Application.GetNamespace("MAPI")
+
+    ' Loop through each EntryID in the collection
+    For i = LBound(entryIDs) To UBound(entryIDs)
         ' Get the email item using its EntryID
         Set objMail = ns.GetItemFromID(entryIDs(i))
-        
+
         ' Make sure the item is a MailItem (ignore other types like calendar items)
         If TypeName(objMail) = "MailItem" Then
-            ' Check if there are any categories
-            If categories.Count > 0 Then
-                ' Get the first category from the list
-                Set firstCategory = categories.item(1) ' Access the first category
-                objMail.categories = firstCategory.Name ' Assign the first category to the email
-                objMail.Save ' Save the changes
-
-                ' Optional: Show the category that was assigned (for debugging)
-                ' MsgBox "Assigned category: " & firstCategory.Name
+            ' Open or append to the CSV file
+            On Error Resume Next
+            Set fso = CreateObject("Scripting.FileSystemObject")
+            If fso.FileExists(csvFilePath) Then
+                On Error GoTo HandleFileError
+                Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
+            Else
+                Set csvFile = fso.CreateTextFile(csvFilePath, True)
+                ' Write the CSV header
+                csvFile.WriteLine "Date Received,Subject,Sender,Has Attachments,Categories"
             End If
+
+            ' Write the email details to the CSV file
+            csvLine = """" & objMail.ReceivedTime & """," & _
+                      """" & objMail.Subject & """," & _
+                      """" & objMail.SenderName & """," & _
+                      """" & IIf(objMail.Attachments.Count > 0, "Yes", "No") & """," & _
+                      """" & objMail.categories & """"
+            csvFile.WriteLine csvLine
+            csvFile.Close
         End If
     Next i
+
+    Exit Sub
+
+HandleFileError:
+    MsgBox "Error: Unable to access the CSV file. Please ensure it is not open or locked by another application.", vbExclamation
+    Exit Sub
 End Sub
 
 Sub GetEmailsWithCategory()
@@ -76,5 +94,8 @@ Sub GetEmailsWithCategory()
         MsgBox "Subject: " & item.Subject
     Next i
 End Sub
+
+
+
 
 
