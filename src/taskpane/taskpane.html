@@ -9,6 +9,7 @@
 
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    
 
     <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css"/>
@@ -54,6 +55,9 @@
         <div role="button" id="btn-get-sender" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
             <span class="ms-Button-label">Get Email Sender</span>
         </div>
+        <div role="button" id="getEmails" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+            <span class="ms-Button-label">Get Emails With A Certain Category</span>
+        </div>
 
         <!-- <p>
             Display the subject of the current item
@@ -68,8 +72,12 @@
             <div id="email-categories" class="ms-font-m ms-bgColor-neutralLighter ms-List">Click on the "Retrieve Category of The Current Email" button ↑</div>
         </p>
         <p>
-            <!-- Display the subject of the current item -->
+            <!-- Display the email content -->
             <div id="email-content" class="ms-font-m ms-bgColor-neutralLighter ms-List">Email Content Here!</div>
+        </p>
+        <p>
+            <!-- Display the emails with a certain category -->
+            <div id="emails" class="ms-font-m ms-bgColor-neutralLighter ms-List">Email With A Certain Category!</div>
         </p>
         
     </main>

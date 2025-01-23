@@ -13,6 +13,7 @@ Office.onReady((info) => {
     document.getElementById("btn-get-content").onclick = getEmailContent;
     document.getElementById("btn-get-subject").onclick = getEmailSubject;
     document.getElementById("btn-get-sender").onclick = getEmailSender;
+    document.getElementById("getEmails").onclick = getEmailsByCategory;
   }
 });
 
@@ -57,7 +58,7 @@ export async function unassignCategory() {
 function addNewCategoryToList() {
   const masterCategoriesToAdd = [
     {
-        "displayName": "Urgent!",
+        "displayName": "New Category!",
         "color": Office.MailboxEnums.CategoryColor.Preset0
     }
   ];
@@ -72,7 +73,7 @@ function addNewCategoryToList() {
 }
 
 function removeCategoryFromList() {
-  const masterCategoriesToRemove = ["Urgent!"];
+  const masterCategoriesToRemove = ["New Category!"];
 
   Office.context.mailbox.masterCategories.removeAsync(masterCategoriesToRemove, function (asyncResult) {
     if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
@@ -157,21 +158,46 @@ function getCategoryOfCurrentEmail() {
   });
 }
 
+async function setCategoryOfCurrentEmail() {
+  const item = Office.context.mailbox.item;
 
-function setCategoryOfCurrentEmail() {
-  const categoriesToAdd = ["Red category"];
+  // Ensure the item has a conversation ID
+  if (!item.conversationId) {
+    console.log("This email is not part of a thread.");
+    return;
+  }
 
-  Office.context.mailbox.item.categories.addAsync(categoriesToAdd, function (asyncResult) {
+  const categoriesToAdd = ["Purple category"];
+
+  // Categorize the current email
+  Office.context.mailbox.item.categories.addAsync(categoriesToAdd, async function (asyncResult) {
     if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-        console.log("Successfully added categories");
+      console.log("Successfully added category to the current email.");
+
+      // Categorize all emails in the thread
+      await categorizeEmailsInThread(item.conversationId, "Purple category");
     } else {
-        console.log("categories.addAsync call failed with error: " + asyncResult.error.message);
+      console.log("categories.addAsync call failed with error: " + asyncResult.error.message);
     }
   });
 }
 
+
+
+// function setCategoryOfCurrentEmail() {
+//   const categoriesToAdd = ["Purple category"];
+
+//   Office.context.mailbox.item.categories.addAsync(categoriesToAdd, function (asyncResult) {
+//     if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+//         console.log("Successfully added categories");
+//     } else {
+//         console.log("categories.addAsync call failed with error: " + asyncResult.error.message);
+//     }
+//   });
+// }
+
 function removeCategoryFromEmail() {
-  const categoriesToRemove = ["Red category"];
+  const categoriesToRemove = ["Purple category"];
 
   Office.context.mailbox.item.categories.removeAsync(categoriesToRemove, function (asyncResult) {
     if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
@@ -249,3 +275,151 @@ function getEmailSender() {
     senderDisplay.appendChild(header);
   }
 }
+
+async function getEmailsByCategory() {
+  const category = "Red category";
+  const token = await getAccessToken(); // Function to retrieve the Microsoft Graph access token
+
+  if (!token) {
+    console.error("Failed to retrieve access token.");
+    return;
+  }
+
+  const headers = new Headers();
+  headers.append("Authorization", `Bearer ${token}`);
+  headers.append("Content-Type", "application/json");
+
+  // Query messages with a specific category
+  const query = encodeURIComponent(`categories/any(c:c eq '${category}')`);
+  const endpoint = `https://graph.microsoft.com/v1.0/me/messages?$filter=${query}`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "GET",
+      headers: headers,
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch emails by category:", response.statusText);
+      return;
+    }
+
+    const data = await response.json();
+    displayEmailsByCategory(data.value); // Display retrieved emails
+  } catch (error) {
+    console.error("Error fetching emails by category:", error);
+  }
+}
+
+function displayEmailsByCategory(emails) {
+  const displayArea = document.getElementById("emails");
+  displayArea.innerHTML = ""; // Clear previous results
+
+  if (emails.length === 0) {
+    displayArea.textContent = "No emails found for the specified category.";
+    return;
+  }
+
+  let header = document.createElement("b");
+  header.textContent = "Emails with the Specified Category:";
+  displayArea.appendChild(header);
+  displayArea.appendChild(document.createElement("br"));
+
+  emails.forEach((email) => {
+    let emailNode = document.createElement("div");
+    emailNode.textContent = `Subject: ${email.subject}, From: ${email.from.emailAddress.name}`;
+    displayArea.appendChild(emailNode);
+  });
+}
+
+async function getAccessToken() {
+  return new Promise((resolve, reject) => {
+    Office.context.mailbox.getAccessTokenAsync((result) => {
+      if (result.status === Office.AsyncResultStatus.Succeeded) {
+        resolve(result.value);
+      } else {
+        console.error("Failed to get access token:", result.error.message);
+        reject(result.error);
+      }
+    });
+  });
+}
+
+async function getEmailsInThread(conversationId) {
+  const token = await getAccessToken();
+
+  if (!token) {
+    console.error("Failed to retrieve access token.");
+    return [];
+  }
+
+  const headers = new Headers();
+  headers.append("Authorization", `Bearer ${token}`);
+  headers.append("Content-Type", "application/json");
+
+  const endpoint = `https://graph.microsoft.com/v1.0/me/messages?$filter=conversationId eq '${conversationId}'`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "GET",
+      headers: headers,
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch emails in the thread:", response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.value || [];
+  } catch (error) {
+    console.error("Error fetching emails in the thread:", error);
+    return [];
+  }
+}
+
+
+async function categorizeEmailsInThread(conversationId, category) {
+  const emails = await getEmailsInThread(conversationId);
+
+  if (emails.length === 0) {
+    console.log("No emails found in the thread.");
+    return;
+  }
+
+  const token = await getAccessToken();
+
+  if (!token) {
+    console.error("Failed to retrieve access token.");
+    return;
+  }
+
+  const headers = new Headers();
+  headers.append("Authorization", `Bearer ${token}`);
+  headers.append("Content-Type", "application/json");
+
+  // Loop through the emails and update their categories
+  for (const email of emails) {
+    const endpoint = `https://graph.microsoft.com/v1.0/me/messages/${email.id}`;
+    const body = JSON.stringify({
+      categories: [...(email.categories || []), category], // Add the category
+    });
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "PATCH",
+        headers: headers,
+        body: body,
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to update email ${email.id}:`, response.statusText);
+      } else {
+        console.log(`Successfully updated email ${email.id}`);
+      }
+    } catch (error) {
+      console.error(`Error updating email ${email.id}:`, error);
+    }
+  }
+}
+
