@@ -4,7 +4,7 @@
     "manifestVersion": "1.17",
     "version": "1.0.0",
     "name": {
-        "short": "Mo's add-in",
+        "short": "Capstone Add-in",
         "full": "Contoso Task Pane Add-in"
     },
     "description": {
@@ -124,7 +124,7 @@
                                         {
                                             "id": "msgReadOpenPaneButton",
                                             "type": "button",
-                                            "label": "Show Taskpane",
+                                            "label": "Capstone Add-in",
                                             "icons": [
                                                 {
                                                     "size": 16,
@@ -140,7 +140,7 @@
                                                 }
                                             ],
                                             "supertip": {
-                                                "title": "Show Taskpane",
+                                                "title": "Capstone Add-in",
                                                 "description": "Opens a pane displaying all available properties."
                                             },
                                             "actionId": "TaskPaneRuntimeShow"
@@ -148,7 +148,7 @@
                                         {
                                             "id": "ActionButton",
                                             "type": "button",
-                                            "label": "Perform an action",
+                                            "label": "Categorize/Assign",
                                             "icons": [
                                                 {
                                                     "size": 16,
@@ -164,7 +164,7 @@
                                                 }
                                             ],
                                             "supertip": {
-                                                "title": "Perform an action",
+                                                "title": "Categorize/Assign",
                                                 "description": "Perform an action when clicked."
                                             },
                                             "actionId": "action"
