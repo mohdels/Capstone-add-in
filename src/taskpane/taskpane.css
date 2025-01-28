@@ -1,170 +1,60 @@
-/* General body styling */
-html,
 body {
-    width: 100%;
-    height: 100%;
+    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f3f2f1;
-    color: #323130;
-}
-
-/* Header styling */
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    background: linear-gradient(135deg, #0078d7, #005a9e);
-    color: #ffffff;
-    border-bottom: 3px solid #004578;
-}
-
-header img {
-    border-radius: 50%;
-    border: 2px solid #ffffff;
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* Section styling */
-#sideload-msg {
-    text-align: center;
-    padding: 2rem;
-    font-size: 1.2rem;
-    color: #605e5c;
-}
-
-/* Main container */
-#app-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    gap: 1.5rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-/* Section heading */
-#app-body > h2 {
-    width: 100%;
-    text-align: center;
-    font-size: 2rem;
+    padding: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  
+  h1 {
+    color: #005a9e;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  p {
+    font-size: 14px;
     margin-bottom: 20px;
-    color: #0078d7;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 10px;
-}
-
-/* List items */
-ul.ms-List {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    max-width: 400px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.ms-ListItem {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-}
-
-.ms-ListItem:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    background-color: #f4faff;
-}
-
-.ms-ListItem i {
-    font-size: 1.5rem;
-    color: #0078d7;
-}
-
-.ms-ListItem span {
-    font-size: 1rem;
-    color: #323130;
-}
-
-/* Button styling */
-.ms-Button {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    text-align: center;
-    color: #ffffff;
+  }
+  
+  button {
     background-color: #0078d7;
+    color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 14px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.ms-Button:hover {
+    margin-top: 10px;
+  }
+  
+  button:hover {
     background-color: #005a9e;
-    transform: translateY(-2px);
-}
-
-.ms-Button:focus {
-    outline: 3px solid #80bfff;
-}
-
-/* Category display boxes */
-.ms-bgColor-neutralLighter {
-    background-color: #eef6ff;
-    padding: 1rem;
-    border-radius: 5px;
-    border: 1px solid #cce7ff;
-    width: 100%;
-    max-width: 400px;
-    text-align: left;
-    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.ms-bgColor-neutralLighter:hover {
-    transform: scale(1.03);
-    background-color: #d8ecff;
-}
-
-/* Responsive design */
-@media (max-width: 600px) {
-    header {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    header img {
-        margin-bottom: 1rem;
-    }
-
-    #app-body {
-        padding: 1rem;
-    }
-
-    ul.ms-List {
-        max-width: 100%;
-    }
-
-    ul.ms-List {
-        grid-template-columns: 1fr;
-    }
-}
+  }
+  
+  input[type="file"] {
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  
+  canvas {
+    display: block;
+    margin: 20px auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    color: #333;
+    font-size: 20px;
+    margin-top: 30px;
+  }
+  
+  h3 {
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 10px;
+  }
+  
