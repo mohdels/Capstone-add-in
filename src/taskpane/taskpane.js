@@ -4,7 +4,6 @@ import jsPDF from "jspdf";
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
-<<<<<<< HEAD
     document.getElementById("run-report").onclick = generateReport;
     document.getElementById("download-pdf").onclick = generatePDF;
   }
@@ -48,69 +47,8 @@ function processAndVisualizeData(data) {
     const date = email.date ? new Date(email.date).getDate() : null;
     if (date) {
       dailyEmails[date] = (dailyEmails[date] || 0) + 1;
-=======
-    document.getElementById("sideload-msg").style.display = "none";
-    document.getElementById("app-body").style.display = "flex";
-    document.getElementById("retrieveAll").onclick = retrieveAll;
-    document.getElementById("addNewCategory").onclick = addNewCategory;
-    document.getElementById("removeCategory").onclick = removeCategory;
-    document.getElementById("setCategory").onclick = setCategory;
-    document.getElementById("retrieveCurrent").onclick = retrieveCurrent;
-    document.getElementById("unassignCategory").onclick = unassignCategory;
-    document.getElementById("btn-get-content").onclick = getEmailContent;
-    document.getElementById("btn-get-subject").onclick = getEmailSubject;
-    document.getElementById("btn-get-sender").onclick = getEmailSender;
-    document.getElementById("getEmails").onclick = getEmailsByCategory;
-  }
-});
-
-export async function retrieveAll() {
-  retrieveCategoriesInList();
-}
-
-export async function addNewCategory() {
-  addNewCategoryToList();
-  retrieveCategoriesInList();
-}
-
-export async function removeCategory() {
-  removeCategoryFromList();
-  retrieveCategoriesInList();
-}
-
-export async function setCategory() {
-  setCategoryOfCurrentEmail();
-  getCategoryOfCurrentEmail();
-}
-
-export async function retrieveCurrent() {
-  getCategoryOfCurrentEmail();
-}
-
-export async function unassignCategory() {
-  removeCategoryFromEmail();
-}
-
-// function getSubjectOfCurrentEmail() {
-//   const item = Office.context.mailbox.item;
-//   // Display the subject of the current item
-//   let insertAt = document.getElementById("item-subject");
-//   let label = document.createElement("b").appendChild(document.createTextNode("Subject: "));
-//   insertAt.appendChild(label);
-//   insertAt.appendChild(document.createElement("br"));
-//   insertAt.appendChild(document.createTextNode(item.subject));
-//   insertAt.appendChild(document.createElement("br"));
-// }
-
-function addNewCategoryToList() {
-  const masterCategoriesToAdd = [
-    {
-        "displayName": "New Category!",
-        "color": Office.MailboxEnums.CategoryColor.Preset0
->>>>>>> 7de74bde6252196431e9f761f69e45edfa776aab
     }
 
-<<<<<<< HEAD
     // Count emails by category
     const category = email.category || "Uncategorized";
     emailsByCategory[category] = (emailsByCategory[category] || 0) + 1;
@@ -118,19 +56,6 @@ function addNewCategoryToList() {
     // Count emails by assignee
     const assignee = email.assignedTo || "Unassigned";
     emailsByAssignee[assignee] = (emailsByAssignee[assignee] || 0) + 1;
-=======
-  Office.context.mailbox.masterCategories.addAsync(masterCategoriesToAdd, function (asyncResult) {
-    if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-        window.console.log("Successfully added categories to master list");
-    } else {
-        console.log("masterCategories.addAsync call failed with error: " + asyncResult.error.message);
-    }
-  });
-}
-
-function removeCategoryFromList() {
-  const masterCategoriesToRemove = ["New Category!"];
->>>>>>> 7de74bde6252196431e9f761f69e45edfa776aab
 
     // Check attachments (normalize values to handle variations like spaces, capitalization, etc.)
     const hasAttachments =
@@ -141,7 +66,6 @@ function removeCategoryFromList() {
     }
   });
 
-<<<<<<< HEAD
   const emailsWithoutAttachments = data.length - emailsWithAttachments;
 
   // Render charts
@@ -238,131 +162,6 @@ function addChartToPDF(canvasId, title, pdf, x, y) {
 
   pdf.text(title, x, y - 5); // Add title above the chart
   pdf.addImage(imageData, "PNG", x, y, 180, 80); // Add chart image
-=======
-function retrieveCategoriesInList() {
-  // Call getAsync to retrieve all available categories
-
-  Office.context.mailbox.masterCategories.getAsync((result) => {
-    
-    if (result != null && result.status === Office.AsyncResultStatus.Succeeded) {
-      let categories = result.value;
-      let categoryDisplay = document.getElementById("item-categories");
-      
-      // Clear previous categories if any
-      categoryDisplay.innerHTML = "";
-      
-      // Add a header
-      let header = document.createElement("b");
-      header.textContent = "Categories available:";
-      categoryDisplay.appendChild(header);
-      categoryDisplay.appendChild(document.createElement("br"));
-
-      // Loop through the categories and display each one
-      categories.forEach((category) => {
-        let categoryNode = document.createElement("div");
-        categoryNode.textContent = `Name: ${category.displayName}`;
-        categoryDisplay.appendChild(categoryNode);
-      });
-    } else {
-      if (result == null) {
-        window.console.error("Result is null!!");
-        return;
-      }
-      console.error("Failed to retrieve categories: " + result.error.message);
-    }
-    return;
-  });
-}
-
-function getCategoryOfCurrentEmail() {
-  Office.context.mailbox.item.categories.getAsync(function (asyncResult) {
-    let categoryDisplay = document.getElementById("email-categories");
-    categoryDisplay.innerHTML = ""; // Clear previous content
-
-    if (asyncResult.status === Office.AsyncResultStatus.Failed) {
-      // Log the error message if available
-      if (asyncResult.error) {
-        console.log("Action failed with error: " + asyncResult.error.message);
-      } else {
-        console.log("Action failed with an unknown error.");
-      }
-    } else {
-      const categories = asyncResult.value;
-
-      // Loop through the categories and display each one
-      if (categories.length > 0) {
-
-        // Add a header
-        let header = document.createElement("b");
-        header.textContent = "Assigned Categories to this Email:";
-        categoryDisplay.appendChild(header);
-        categoryDisplay.appendChild(document.createElement("br"));
-        categories.forEach((category) => {
-          let categoryNode = document.createElement("div");
-          categoryNode.textContent = `Name: ${category.displayName}`;
-          categoryDisplay.appendChild(categoryNode);
-        });
-      } else {
-        // Create a proper header element
-        let header = document.createElement("b");
-        header.textContent = "No Categories Are Assigned to this email.";
-        categoryDisplay.appendChild(header);
-
-      }
-    }
-  });
-}
-
-async function setCategoryOfCurrentEmail() {
-  const item = Office.context.mailbox.item;
-
-  // Ensure the item has a conversation ID
-  if (!item.conversationId) {
-    console.log("This email is not part of a thread.");
-    return;
-  }
-
-  const categoriesToAdd = ["Purple category"];
-
-  // Categorize the current email
-  Office.context.mailbox.item.categories.addAsync(categoriesToAdd, async function (asyncResult) {
-    if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-      console.log("Successfully added category to the current email.");
-
-      // Categorize all emails in the thread
-      await categorizeEmailsInThread(item.conversationId, "Purple category");
-    } else {
-      console.log("categories.addAsync call failed with error: " + asyncResult.error.message);
-    }
-  });
-}
-
-
-
-// function setCategoryOfCurrentEmail() {
-//   const categoriesToAdd = ["Purple category"];
-
-//   Office.context.mailbox.item.categories.addAsync(categoriesToAdd, function (asyncResult) {
-//     if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-//         console.log("Successfully added categories");
-//     } else {
-//         console.log("categories.addAsync call failed with error: " + asyncResult.error.message);
-//     }
-//   });
-// }
-
-function removeCategoryFromEmail() {
-  const categoriesToRemove = ["Purple category"];
-
-  Office.context.mailbox.item.categories.removeAsync(categoriesToRemove, function (asyncResult) {
-    if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-        getCategoryOfCurrentEmail();
-        console.log("Successfully removed categories");
-    } else {
-        console.log("categories.removeAsync call failed with error: " + asyncResult.error.message);
-    }
-});
->>>>>>> 7de74bde6252196431e9f761f69e45edfa776aab
 }
 
 // Function to get email content
