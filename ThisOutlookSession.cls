@@ -8,73 +8,99 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
-    Dim ns As Object
-    Dim objMail As Object
-    Dim categories As Outlook.categories
-    Dim firstCategory As Outlook.category
-    Dim entryIDs() As String
-    Dim i As Integer
-    
-    ' Split the EntryID collection into individual EntryIDs (in case more than one email comes in at once)
-    entryIDs = Split(EntryIDCollection, ",")
-    
-    ' Get MAPI namespace (used to access Outlook data)
-    Set ns = Application.GetNamespace("MAPI")
-    
-    ' Retrieve the list of categories defined in Outlook
-    Set categories = Application.Session.categories
-
-    ' Loop through each EntryID in the collection (using a For loop)
-    For i = 0 To UBound(entryIDs)
-        ' Get the email item using its EntryID
-        Set objMail = ns.GetItemFromID(entryIDs(i))
-        
-        ' Make sure the item is a MailItem (ignore other types like calendar items)
-        If TypeName(objMail) = "MailItem" Then
-            ' Check if there are any categories
-            If categories.Count > 0 Then
-                ' Get the first category from the list
-                Set firstCategory = categories.item(1) ' Access the first category
-                objMail.categories = firstCategory.Name ' Assign the first category to the email
-                objMail.Save ' Save the changes
-
-                ' Optional: Show the category that was assigned (for debugging)
-                ' MsgBox "Assigned category: " & firstCategory.Name
-            End If
-        End If
-    Next i
-End Sub
-
-Sub GetEmailsWithCategory()
     Dim ns As Outlook.NameSpace
     Dim inbox As Outlook.Folder
     Dim items As Outlook.items
     Dim filteredItems As Outlook.items
-    Dim item As Object
-    Dim category As String
-    Dim i As Integer
+    Dim filteredItem As Object
+    Dim csvFilePath As String
+    Dim fso As Object
+    Dim csvFile As Object
+    Dim csvLine As String
+    Dim recipient As Outlook.recipient
+    Dim recipientEmails As String
+    Dim customFolderPath As String
+    
+    ' Define the path for the custom folder in ProgramData
+    customFolderPath = Environ("PROGRAMDATA") & "\MyApp\"
+    
+    ' Ensure the folder exists
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If Not fso.FolderExists(customFolderPath) Then
+        fso.CreateFolder customFolderPath
+    End If
+    
+    ' Set the full path for the CSV file
+    csvFilePath = customFolderPath & "EmailsFrom2025.csv"
 
-    ' Define the category to search for
-    category = "fun" ' Change this to your desired category name
-
-    ' Get the MAPI namespace
+    ' Get the MAPI namespace and Inbox folder
     Set ns = Application.GetNamespace("MAPI")
-
-    ' Get the Inbox folder
     Set inbox = ns.GetDefaultFolder(olFolderInbox)
 
     ' Get all items in the Inbox folder
     Set items = inbox.items
 
-    ' Restrict the items collection to only those with the specific category
-    Set filteredItems = items.Restrict("[Categories] = '" & category & "'")
+    ' Filter emails received from 2025 onwards
+    Set filteredItems = items.Restrict("[ReceivedTime] >= '01/01/2025'")
 
-    ' Loop through the filtered items and display information
-    For i = 1 To filteredItems.Count
-        Set item = filteredItems.item(i)
-        ' Example: Display the Subject of each email in the filtered items
-        MsgBox "Subject: " & item.Subject
-    Next i
+    ' Check if filteredItems contains any emails
+    If filteredItems.Count = 0 Then
+        MsgBox "No emails found from 2025 onward.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Open or create the CSV file
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If fso.FileExists(csvFilePath) Then
+        Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
+    Else
+        Set csvFile = fso.CreateTextFile(csvFilePath, True)
+        ' Write the CSV header
+        csvFile.WriteLine "senderEmail,receiverEmail,date,subject,body,category,assignedTo,hasAttachments"
+    End If
+
+    ' Loop through the filtered items and write their details to the CSV
+    For Each filteredItem In filteredItems
+        If TypeName(filteredItem) = "MailItem" Then
+            ' Initialize recipientEmails
+            recipientEmails = ""
+    
+            ' Collect recipient email addresses
+            On Error Resume Next
+            If Not filteredItem.Recipients Is Nothing Then
+                For Each recipient In filteredItem.Recipients
+                    If Not recipient Is Nothing Then
+                        recipientEmails = recipientEmails & recipient.Address & ";"
+                    End If
+                Next recipient
+            End If
+            On Error GoTo 0
+    
+            ' Remove the trailing semicolon
+            If Len(recipientEmails) > 0 Then
+                recipientEmails = Left(recipientEmails, Len(recipientEmails) - 1)
+            End If
+    
+            ' Write the email details to the CSV
+            csvLine = """" & filteredItem.SenderEmailAddress & """," & _
+                      """" & recipientEmails & """," & _
+                      """" & filteredItem.ReceivedTime & """," & _
+                      """" & filteredItem.Subject & """," & _
+                      """" & Replace(filteredItem.Body, vbNewLine, " ") & """," & _
+                      """" & filteredItem.categories & """," & _
+                      """NotAssigned""" & "," & _
+                      """" & IIf(filteredItem.Attachments.Count > 0, "Yes", "No") & """"
+            On Error Resume Next
+            csvFile.WriteLine csvLine
+            On Error GoTo 0
+        End If
+    Next filteredItem
+
+
+    ' Close the CSV file
+    csvFile.Close
+
+    MsgBox "Emails from 2025 till now have been saved to: " & csvFilePath, vbInformation
 End Sub
 
 
