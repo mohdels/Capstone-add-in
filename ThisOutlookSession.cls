@@ -110,7 +110,7 @@ Function CategorizeEmail(mail As Outlook.MailItem) As String
     ' Initialize HTTP request
     Set http = CreateObject("MSXML2.XMLHTTP")
 
-    ' ? Properly escape JSON body content
+    ' ? Clean email body before sending
     json = "{""body"":""" & EscapeJSON(mail.Body) & """}"
 
     ' Send POST request to Python API
@@ -140,13 +140,26 @@ Function CategorizeEmail(mail As Outlook.MailItem) As String
 End Function
 
 Function EscapeJSON(text As String) As String
-    text = Replace(text, "\", "\\")  ' Escape backslashes
-    text = Replace(text, """", "\""")  ' Escape double quotes
-    text = Replace(text, vbCrLf, "\n")  ' Convert new lines
-    text = Replace(text, vbLf, "\n")  ' Convert line feeds
-    text = Replace(text, vbCr, "\n")  ' Convert carriage returns
-    EscapeJSON = text
+    ' Remove non-printable ASCII characters (below 32)
+    Dim i As Integer
+    Dim cleanText As String
+    For i = 1 To Len(text)
+        If Asc(Mid(text, i, 1)) >= 32 Then
+            cleanText = cleanText & Mid(text, i, 1)
+        End If
+    Next i
+
+    ' Escape backslashes and quotes for JSON compatibility
+    cleanText = Replace(cleanText, "\", "\\")  ' Escape backslashes
+    cleanText = Replace(cleanText, """", "\""")  ' Escape double quotes
+    cleanText = Replace(cleanText, vbCrLf, " ")  ' Convert new lines to spaces
+    cleanText = Replace(cleanText, vbLf, " ")  ' Convert line feeds to spaces
+    cleanText = Replace(cleanText, vbCr, " ")  ' Convert carriage returns to spaces
+
+    ' Trim leading and trailing spaces
+    EscapeJSON = Trim(cleanText)
 End Function
+
 
 
 
