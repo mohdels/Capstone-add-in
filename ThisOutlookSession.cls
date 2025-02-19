@@ -10,118 +10,18 @@ Attribute VB_Exposed = True
 Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
     Dim ns As Outlook.NameSpace
     Dim inbox As Outlook.Folder
-    Dim items As Outlook.items
-    Dim filteredItems As Outlook.items
-    Dim filteredItem As Object
+    Dim mail As Outlook.MailItem
+    Dim newMail As Object
     Dim csvFilePath As String
+    Dim txtFilePath As String
     Dim fso As Object
     Dim csvFile As Object
+    Dim txtFile As Object
     Dim csvLine As String
     Dim recipient As Outlook.recipient
     Dim recipientEmails As String
     Dim customFolderPath As String
-    
-    ' Define the path for the custom folder in ProgramData
-    customFolderPath = Environ("PROGRAMDATA") & "\MyApp\"
-    
-    ' Ensure the folder exists
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    If Not fso.FolderExists(customFolderPath) Then
-        fso.CreateFolder customFolderPath
-    End If
-    
-    ' Set the full path for the CSV file
-    csvFilePath = customFolderPath & "EmailsFrom2025.csv"
-
-    ' Get the MAPI namespace and Inbox folder
-    Set ns = Application.GetNamespace("MAPI")
-    Set inbox = ns.GetDefaultFolder(olFolderInbox)
-
-    ' Get all items in the Inbox folder
-    Set items = inbox.items
-
-    ' Filter emails received from 2025 onwards
-    Set filteredItems = items.Restrict("[ReceivedTime] >= '01/01/2025'")
-
-    ' Check if filteredItems contains any emails
-    If filteredItems.Count = 0 Then
-        MsgBox "No emails found from 2025 onward.", vbExclamation
-        Exit Sub
-    End If
-
-    ' Open or create the CSV file
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    If fso.FileExists(csvFilePath) Then
-        Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
-    Else
-        Set csvFile = fso.CreateTextFile(csvFilePath, True)
-        ' Write the CSV header
-        csvFile.WriteLine "senderEmail,receiverEmail,date,subject,body,category,assignedTo,hasAttachments"
-    End If
-
-    ' Loop through the filtered items and write their details to the CSV
-    For Each filteredItem In filteredItems
-        If TypeName(filteredItem) = "MailItem" Then
-            ' Initialize recipientEmails
-            recipientEmails = ""
-    
-            ' Collect recipient email addresses
-            On Error Resume Next
-            If Not filteredItem.Recipients Is Nothing Then
-                For Each recipient In filteredItem.Recipients
-                    If Not recipient Is Nothing Then
-                        recipientEmails = recipientEmails & recipient.Address & ";"
-                    End If
-                Next recipient
-            End If
-            On Error GoTo 0
-    
-            ' Remove the trailing semicolon
-            If Len(recipientEmails) > 0 Then
-                recipientEmails = Left(recipientEmails, Len(recipientEmails) - 1)
-            End If
-    
-            ' Write the email details to the CSV
-            csvLine = """" & filteredItem.SenderEmailAddress & """," & _
-                      """" & recipientEmails & """," & _
-                      """" & filteredItem.ReceivedTime & """," & _
-                      """" & filteredItem.Subject & """," & _
-                      """" & Replace(filteredItem.Body, vbNewLine, " ") & """," & _
-                      """" & filteredItem.categories & """," & _
-                      """NotAssigned""" & "," & _
-                      """" & IIf(filteredItem.Attachments.Count > 0, "Yes", "No") & """"
-            On Error Resume Next
-            csvFile.WriteLine csvLine
-            On Error GoTo 0
-        End If
-    Next filteredItem
-
-
-    ' Close the CSV file
-    csvFile.Close
-
-    MsgBox "Emails from 2025 till now have been saved to: " & csvFilePath, vbInformation
-End Sub
-
-Private Sub Application_Startup()
-    ProcessEmailsOnStartup
-End Sub
-
-Sub ProcessEmailsOnStartup()
-    Dim ns As Outlook.NameSpace
-    Dim inbox As Outlook.Folder
-    Dim items As Outlook.items
-    Dim filteredItems As Outlook.items
-    Dim filteredItem As Object
-    Dim csvFilePath As String
-    Dim fso As Object
-    Dim csvFile As Object
-    Dim csvLine As String
-    Dim recipient As Outlook.recipient
-    Dim recipientEmails As String
-    Dim lastProcessedFile As String
-    Dim lastProcessedTime As Date
-    Dim customFolderPath As String
+    Dim senderEmail As String
 
     ' Define the path for the custom folder in ProgramData
     customFolderPath = Environ("PROGRAMDATA") & "\MyApp\"
@@ -132,127 +32,239 @@ Sub ProcessEmailsOnStartup()
         fso.CreateFolder customFolderPath
     End If
 
-    ' Set the full path for the CSV file and last processed time file
-    csvFilePath = customFolderPath & "EmailsFrom2025.csv"
-    lastProcessedFile = customFolderPath & "last_processed_time.txt"
+    ' Set the full paths for the CSV and TXT files
+    csvFilePath = customFolderPath & "EmailsLog.csv"
+    txtFilePath = customFolderPath & "latest_email.txt"
 
-    ' Read the last processed email timestamp
-    lastProcessedTime = ReadLastProcessedTime(lastProcessedFile)
-
-    ' Get the MAPI namespace and Inbox folder
+    ' Get the MAPI namespace
     Set ns = Application.GetNamespace("MAPI")
-    Set inbox = ns.GetDefaultFolder(olFolderInbox)
-    
-    ' Get all items in the Inbox folder
-    Set items = inbox.items
-    
-    ' Filter emails received after the last processed time
-    Set filteredItems = items.Restrict("[ReceivedTime] >= '" & Format(lastProcessedTime, "MM/DD/YYYY hh:nn:ss AM/PM") & "'")
-    
-    Debug.Print "Total emails found: " & filteredItems.Count
-    MsgBox "Total emails found: " & filteredItems.Count, vbInformation
 
-    ' Open or create the CSV file
-    If fso.FileExists(csvFilePath) Then
-        Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
-    Else
-        Set csvFile = fso.CreateTextFile(csvFilePath, True)
-        ' Write the CSV header
-        csvFile.WriteLine "senderEmail,receiverEmail,date,subject,body,category,assignedTo,hasAttachments"
-    End If
+    ' Get the new email using the EntryID
+    Set newMail = ns.GetItemFromID(EntryIDCollection)
 
-    ' Loop through the filtered items and write their details to the CSV
-    For Each filteredItem In filteredItems
-        If TypeName(filteredItem) = "MailItem" Then
-            ' Initialize recipientEmails
-            recipientEmails = ""
-    
-            ' Collect recipient email addresses using SMTP format
-            On Error Resume Next
-            If Not filteredItem.Recipients Is Nothing Then
-                For Each recipient In filteredItem.Recipients
-                    If Not recipient Is Nothing Then
-                        Dim smtpAddress As String
-                        smtpAddress = GetSMTPAddress(recipient)
-                        If smtpAddress <> "" Then
-                            recipientEmails = recipientEmails & smtpAddress & ";"
-                        End If
-                    End If
-                Next recipient
-            End If
-            On Error GoTo 0
-    
-            ' Remove the trailing semicolon
-            If Len(recipientEmails) > 0 Then
-                recipientEmails = Left(recipientEmails, Len(recipientEmails) - 1)
-            End If
-    
-            ' Write the email details to the CSV
-            csvLine = """" & GetSMTPAddress(filteredItem.Sender) & """," & _
-                      """" & recipientEmails & """," & _
-                      """" & filteredItem.ReceivedTime & """," & _
-                      """" & filteredItem.Subject & """," & _
-                      """" & Replace(filteredItem.Body, vbNewLine, " ") & """," & _
-                      """" & filteredItem.categories & """," & _
-                      """NotAssigned""" & "," & _
-                      """" & IIf(filteredItem.Attachments.Count > 0, "Yes", "No") & """"
-            On Error Resume Next
-            csvFile.WriteLine csvLine
-            On Error GoTo 0
+    ' Ensure it is a MailItem
+    If TypeName(newMail) <> "MailItem" Then Exit Sub
+    Set mail = newMail
 
-            ' Update the last processed time
-            If filteredItem.ReceivedTime > lastProcessedTime Then
-                lastProcessedTime = filteredItem.ReceivedTime
-            End If
-        End If
-    Next filteredItem
+    ' ? Get the real SMTP email for the sender using PropertyAccessor
+    senderEmail = GetSMTPFromProperty(mail)
 
-    ' Close the CSV file
-    csvFile.Close
+    ' Initialize recipientEmails
+    recipientEmails = ""
 
-    ' Save the new last processed timestamp
-    SaveLastProcessedTime lastProcessedFile, lastProcessedTime
-
-End Sub
-
-' Function to get SMTP email address from Outlook recipient
-Function GetSMTPAddress(objRecipient As Outlook.recipient) As String
-    Dim propAccessor As Outlook.PropertyAccessor
+    ' Collect recipient SMTP email addresses
     On Error Resume Next
-    Set propAccessor = objRecipient.PropertyAccessor
-    GetSMTPAddress = propAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x39FE001E")
+    If Not mail.Recipients Is Nothing Then
+        For Each recipient In mail.Recipients
+            If Not recipient Is Nothing Then
+                recipientEmails = recipientEmails & GetSMTPAddress(recipient) & ";"
+            End If
+        Next recipient
+    End If
+    On Error GoTo 0
+
+    ' Remove the trailing semicolon
+    If Len(recipientEmails) > 0 Then
+        recipientEmails = Left(recipientEmails, Len(recipientEmails) - 1)
+    End If
+
+    ' Open or create the CSV file
+    If fso.FileExists(csvFilePath) Then
+        Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
+    Else
+        Set csvFile = fso.CreateTextFile(csvFilePath, True)
+        ' Write the CSV header
+        csvFile.WriteLine "senderEmail,receiverEmail,date,subject,body,category,assignedTo,hasAttachments"
+    End If
+
+    ' Write the email details to the CSV
+    csvLine = """" & senderEmail & """," & _
+              """" & recipientEmails & """," & _
+              """" & mail.ReceivedTime & """," & _
+              """" & mail.Subject & """," & _
+              """" & Replace(mail.Body, vbNewLine, " ") & """," & _
+              """" & mail.categories & """," & _
+              """NotAssigned""" & "," & _
+              """" & IIf(mail.Attachments.Count > 0, "Yes", "No") & """"
+    On Error Resume Next
+    csvFile.WriteLine csvLine
+    csvFile.Close
+    On Error GoTo 0
+
+    ' Update the latest email date/time in the TXT file
+    Set txtFile = fso.CreateTextFile(txtFilePath, True)
+    txtFile.WriteLine "Latest email received on: " & mail.ReceivedTime
+    txtFile.Close
+
+End Sub
+
+' ? Function to retrieve the correct SMTP sender email using PropertyAccessor
+Function GetSMTPFromProperty(mail As Outlook.MailItem) As String
+    Dim prop As String
+    Dim sender As Outlook.AddressEntry
+    Dim pa As Outlook.PropertyAccessor
+    
+    On Error Resume Next
+    Set sender = mail.sender
+    If sender Is Nothing Then Exit Function
+
+    ' Use PropertyAccessor to get SMTP address
+    Set pa = sender.PropertyAccessor
+    prop = pa.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x39FE001E")
+
+    ' If the property exists, return it; otherwise, return the default address
+    If prop <> "" Then
+        GetSMTPFromProperty = prop
+    Else
+        GetSMTPFromProperty = mail.SenderEmailAddress
+    End If
     On Error GoTo 0
 End Function
 
-' Function to read the last processed timestamp from a file
-Function ReadLastProcessedTime(filePath As String) As Date
-    Dim fileNo As Integer
-    Dim fileContent As String
+' ? Function to get the SMTP address for recipients
+Function GetSMTPAddress(obj As Object) As String
+    Dim olExchUser As Outlook.ExchangeUser
+    Dim olExchAddrEntry As Outlook.AddressEntry
 
-    ' Default: if file doesn't exist, set the time to a past date
-    ReadLastProcessedTime = #1/1/2025#
+    On Error Resume Next
+    Set olExchAddrEntry = obj.AddressEntry
 
-    ' Check if the file exists
-    If Dir(filePath) <> "" Then
-        fileNo = FreeFile
-        Open filePath For Input As #fileNo
-        Line Input #fileNo, fileContent
-        Close #fileNo
-
-        ' Validate if the content is a date
-        If IsDate(fileContent) Then
-            ReadLastProcessedTime = CDate(fileContent)
+    If Not olExchAddrEntry Is Nothing Then
+        If olExchAddrEntry.AddressEntryUserType = olExchangeUserAddressEntry Or _
+           olExchAddrEntry.AddressEntryUserType = olExchangeRemoteUserAddressEntry Then
+            Set olExchUser = olExchAddrEntry.GetExchangeUser
+            If Not olExchUser Is Nothing Then
+                GetSMTPAddress = olExchUser.PrimarySmtpAddress
+                Exit Function
+            End If
         End If
     End If
+    
+    ' Default to normal address if SMTP conversion fails
+    GetSMTPAddress = obj.Address
 End Function
 
-' Function to save the last processed timestamp to a file
-Sub SaveLastProcessedTime(filePath As String, newTime As Date)
-    Dim fileNo As Integer
-    fileNo = FreeFile
-    Open filePath For Output As #fileNo
-    Print #fileNo, newTime
-    Close #fileNo
+Public Sub RetrievePastEmailsOnStartup()
+    Dim ns As Outlook.NameSpace
+    Dim inbox As Outlook.Folder
+    Dim items As Outlook.items
+    Dim mail As Outlook.MailItem
+    Dim csvFilePath As String
+    Dim txtFilePath As String
+    Dim fso As Object
+    Dim csvFile As Object
+    Dim txtFile As Object
+    Dim csvLine As String
+    Dim recipient As Outlook.recipient
+    Dim recipientEmails As String
+    Dim customFolderPath As String
+    Dim latestTimestamp As Date
+    Dim mostRecentEmailDate As Date
+    Dim item As Object
+    
+    ' Define the path for the custom folder in ProgramData
+    customFolderPath = Environ("PROGRAMDATA") & "\MyApp\"
+
+    ' Ensure the folder exists
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If Not fso.FolderExists(customFolderPath) Then
+        fso.CreateFolder customFolderPath
+    End If
+
+    ' Set the full paths for the CSV and TXT files
+    csvFilePath = customFolderPath & "EmailsLog.csv"
+    txtFilePath = customFolderPath & "latest_email.txt"
+
+    ' ? Read the last recorded timestamp from the TXT file
+    If fso.FileExists(txtFilePath) Then
+        Set txtFile = fso.OpenTextFile(txtFilePath, 1) ' Read mode
+        latestTimestamp = CDate(Replace(txtFile.ReadLine, "Latest email received on: ", ""))
+        txtFile.Close
+    Else
+        ' If the file does not exist, assume a very old date
+        latestTimestamp = #1/1/2000# ' Default fallback
+    End If
+
+    ' Get the MAPI namespace and Inbox folder
+    Set ns = Application.GetNamespace("MAPI")
+    Set inbox = ns.GetDefaultFolder(olFolderInbox)
+
+    ' Get all emails received after the last timestamp
+    Set items = inbox.items
+    items.Sort "[ReceivedTime]", True ' Sort newest to oldest
+    
+    ' ? Loop through emails and log only those received after latestTimestamp
+    mostRecentEmailDate = latestTimestamp
+    For Each item In items
+        If TypeName(item) = "MailItem" Then
+            Set mail = item
+            
+            ' Skip emails before the last recorded timestamp
+            If mail.ReceivedTime <= latestTimestamp Then Exit For
+            
+            ' Track the most recent email's date
+            If mail.ReceivedTime > mostRecentEmailDate Then
+                mostRecentEmailDate = mail.ReceivedTime
+            End If
+            
+            ' Initialize recipientEmails
+            recipientEmails = ""
+
+            ' Collect recipient SMTP email addresses
+            On Error Resume Next
+            If Not mail.Recipients Is Nothing Then
+                For Each recipient In mail.Recipients
+                    If Not recipient Is Nothing Then
+                        recipientEmails = recipientEmails & GetSMTPAddress(recipient) & ";"
+                    End If
+                Next recipient
+            End If
+            On Error GoTo 0
+
+            ' Remove the trailing semicolon
+            If Len(recipientEmails) > 0 Then
+                recipientEmails = Left(recipientEmails, Len(recipientEmails) - 1)
+            End If
+
+            ' Open or create the CSV file
+            If fso.FileExists(csvFilePath) Then
+                Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
+            Else
+                Set csvFile = fso.CreateTextFile(csvFilePath, True)
+                ' Write the CSV header
+                csvFile.WriteLine "senderEmail,receiverEmail,date,subject,body,category,assignedTo,hasAttachments"
+            End If
+
+            ' ? Get the real SMTP sender email
+            senderEmail = GetSMTPFromProperty(mail)
+
+            ' Write the email details to the CSV
+            csvLine = """" & senderEmail & """," & _
+                      """" & recipientEmails & """," & _
+                      """" & mail.ReceivedTime & """," & _
+                      """" & mail.Subject & """," & _
+                      """" & Replace(mail.Body, vbNewLine, " ") & """," & _
+                      """" & mail.categories & """," & _
+                      """NotAssigned""" & "," & _
+                      """" & IIf(mail.Attachments.Count > 0, "Yes", "No") & """"
+            On Error Resume Next
+            csvFile.WriteLine csvLine
+            csvFile.Close
+            On Error GoTo 0
+        End If
+    Next item
+
+    ' ? Update the latest email date/time in the TXT file
+    If mostRecentEmailDate > latestTimestamp Then
+        Set txtFile = fso.CreateTextFile(txtFilePath, True)
+        txtFile.WriteLine "Latest email received on: " & mostRecentEmailDate
+        txtFile.Close
+    End If
+
+    MsgBox "Emails retrieved from " & latestTimestamp & " onward have been logged.", vbInformation
 End Sub
 
+Private Sub Application_Startup()
+    RetrievePastEmailsOnStartup
+End Sub
 
