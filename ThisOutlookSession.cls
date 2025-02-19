@@ -22,6 +22,7 @@ Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
     Dim recipientEmails As String
     Dim customFolderPath As String
     Dim senderEmail As String
+    Dim category As String
 
     ' Define the path for the custom folder in ProgramData
     customFolderPath = Environ("PROGRAMDATA") & "\MyApp\"
@@ -68,6 +69,9 @@ Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
         recipientEmails = Left(recipientEmails, Len(recipientEmails) - 1)
     End If
 
+    ' ? Categorize the email using Python API
+    category = CategorizeEmail(mail)
+
     ' Open or create the CSV file
     If fso.FileExists(csvFilePath) Then
         Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
@@ -83,7 +87,7 @@ Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
               """" & mail.ReceivedTime & """," & _
               """" & mail.Subject & """," & _
               """" & Replace(mail.Body, vbNewLine, " ") & """," & _
-              """" & mail.categories & """," & _
+              """" & category & """," & _
               """NotAssigned""" & "," & _
               """" & IIf(mail.Attachments.Count > 0, "Yes", "No") & """"
     On Error Resume Next
@@ -91,12 +95,60 @@ Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
     csvFile.Close
     On Error GoTo 0
 
-    ' Update the latest email date/time in the TXT file
+    ' ? Update the latest email date/time in the TXT file
     Set txtFile = fso.CreateTextFile(txtFilePath, True)
     txtFile.WriteLine "Latest email received on: " & mail.ReceivedTime
     txtFile.Close
 
 End Sub
+
+Function CategorizeEmail(mail As Outlook.MailItem) As String
+    Dim http As Object
+    Dim json As String
+    Dim response As String
+
+    ' Initialize HTTP request
+    Set http = CreateObject("MSXML2.XMLHTTP")
+
+    ' ? Properly escape JSON body content
+    json = "{""body"":""" & EscapeJSON(mail.Body) & """}"
+
+    ' Send POST request to Python API
+    With http
+        .Open "POST", "http://localhost:3001/email", False
+        .setRequestHeader "Content-Type", "application/json"
+        .Send json
+    End With
+
+    ' Handle the response
+    If http.Status = 200 Then
+        response = http.responseText
+
+        ' Extract categories from JSON response
+        response = Replace(response, "[", "")
+        response = Replace(response, "]", "")
+        response = Replace(response, """", "")
+
+        ' Assign category
+        CategorizeEmail = response
+        mail.categories = response ' Assign category in Outlook
+        mail.Save ' Save changes
+    Else
+        MsgBox "Error categorizing email: " & http.Status & " - " & http.responseText, vbExclamation
+        CategorizeEmail = "Uncategorized"
+    End If
+End Function
+
+Function EscapeJSON(text As String) As String
+    text = Replace(text, "\", "\\")  ' Escape backslashes
+    text = Replace(text, """", "\""")  ' Escape double quotes
+    text = Replace(text, vbCrLf, "\n")  ' Convert new lines
+    text = Replace(text, vbLf, "\n")  ' Convert line feeds
+    text = Replace(text, vbCr, "\n")  ' Convert carriage returns
+    EscapeJSON = text
+End Function
+
+
 
 ' ? Function to retrieve the correct SMTP sender email using PropertyAccessor
 Function GetSMTPFromProperty(mail As Outlook.MailItem) As String
@@ -161,6 +213,8 @@ Public Sub RetrievePastEmailsOnStartup()
     Dim latestTimestamp As Date
     Dim mostRecentEmailDate As Date
     Dim item As Object
+    Dim senderEmail As String
+    Dim category As String
     
     ' Define the path for the custom folder in ProgramData
     customFolderPath = Environ("PROGRAMDATA") & "\MyApp\"
@@ -192,7 +246,7 @@ Public Sub RetrievePastEmailsOnStartup()
     ' Get all emails received after the last timestamp
     Set items = inbox.items
     items.Sort "[ReceivedTime]", True ' Sort newest to oldest
-    
+
     ' ? Loop through emails and log only those received after latestTimestamp
     mostRecentEmailDate = latestTimestamp
     For Each item In items
@@ -207,6 +261,9 @@ Public Sub RetrievePastEmailsOnStartup()
                 mostRecentEmailDate = mail.ReceivedTime
             End If
             
+            ' ? Get the real SMTP sender email
+            senderEmail = GetSMTPFromProperty(mail)
+
             ' Initialize recipientEmails
             recipientEmails = ""
 
@@ -226,6 +283,9 @@ Public Sub RetrievePastEmailsOnStartup()
                 recipientEmails = Left(recipientEmails, Len(recipientEmails) - 1)
             End If
 
+            ' ? Categorize the email using Python API
+            category = CategorizeEmail(mail)
+
             ' Open or create the CSV file
             If fso.FileExists(csvFilePath) Then
                 Set csvFile = fso.OpenTextFile(csvFilePath, 8) ' Append mode
@@ -235,16 +295,13 @@ Public Sub RetrievePastEmailsOnStartup()
                 csvFile.WriteLine "senderEmail,receiverEmail,date,subject,body,category,assignedTo,hasAttachments"
             End If
 
-            ' ? Get the real SMTP sender email
-            senderEmail = GetSMTPFromProperty(mail)
-
             ' Write the email details to the CSV
             csvLine = """" & senderEmail & """," & _
                       """" & recipientEmails & """," & _
                       """" & mail.ReceivedTime & """," & _
                       """" & mail.Subject & """," & _
                       """" & Replace(mail.Body, vbNewLine, " ") & """," & _
-                      """" & mail.categories & """," & _
+                      """" & category & """," & _
                       """NotAssigned""" & "," & _
                       """" & IIf(mail.Attachments.Count > 0, "Yes", "No") & """"
             On Error Resume Next
@@ -261,8 +318,9 @@ Public Sub RetrievePastEmailsOnStartup()
         txtFile.Close
     End If
 
-    MsgBox "Emails retrieved from " & latestTimestamp & " onward have been logged.", vbInformation
+    MsgBox "Emails retrieved from " & latestTimestamp & " onward have been logged and categorized.", vbInformation
 End Sub
+
 
 Private Sub Application_Startup()
     RetrievePastEmailsOnStartup
