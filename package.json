@@ -1,9 +1,9 @@
 {
-  "name": "office-addin-taskpane-js",
+  "name": "office-addin-taskpane",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OfficeDev/Office-Addin-TaskPane-JS.git"
+    "url": "git+https://github.com/OfficeDev/Office-Addin-TaskPane-JS.git"
   },
   "license": "MIT",
   "config": {
@@ -28,8 +28,12 @@
   "dependencies": {
     "chartjs": "^0.3.24",
     "core-js": "^3.36.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "jspdf": "^2.5.2",
+    "nodemailer": "^6.10.0",
     "papaparse": "^5.5.1",
     "regenerator-runtime": "^0.14.1"
   },
@@ -62,5 +66,13 @@
   "browserslist": [
     "last 2 versions",
     "ie 11"
-  ]
+  ],
+  "main": "webpack.config.js",
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/OfficeDev/Office-Addin-TaskPane-JS/issues"
+  },
+  "homepage": "https://github.com/OfficeDev/Office-Addin-TaskPane-JS#readme",
+  "description": ""
 }

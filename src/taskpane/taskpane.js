@@ -6,6 +6,9 @@ Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     document.getElementById("run-report").onclick = generateReport;
     document.getElementById("download-pdf").onclick = generatePDF;
+    document.getElementById("open-form").onclick = () => {
+      window.location.href = "https://localhost:3000/form.html";
+    };
   }
 });
 

@@ -2,20 +2,20 @@
     "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
     "id": "1f4ae938-59a8-4d4b-a365-f945c867c9bc",
     "manifestVersion": "1.17",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": {
         "short": "Capstone Add-in",
-        "full": "Contoso Task Pane Add-in"
+        "full": "Capstone Outlook Add-in"
     },
     "description": {
-        "short": "A template to get started.",
-        "full": "This is the template to get started."
+        "short": "A powerful Outlook add-in for email categorization and reporting.",
+        "full": "This add-in allows users to generate email reports, categorize emails, and submit contact forms via SMTP."
     },
     "developer": {
-        "name": "Contoso",
-        "websiteUrl": "https://www.contoso.com",
-        "privacyUrl": "https://www.contoso.com/privacy",
-        "termsOfUseUrl": "https://www.contoso.com/servicesagreement"
+        "name": "Your Organization",
+        "websiteUrl": "https://yourwebsite.com",
+        "privacyUrl": "https://yourwebsite.com/privacy",
+        "termsOfUseUrl": "https://yourwebsite.com/terms"
     },
     "icons": {
         "outline": "assets/outline.png",
@@ -30,6 +30,10 @@
         "permissions": {
             "resourceSpecific": [
                 {
+                    "name": "Mail.ReadWrite",
+                    "type": "Delegated"
+                },
+                {
                     "name": "Mailbox.ReadWrite.User",
                     "type": "Delegated"
                 }
@@ -37,14 +41,15 @@
         }
     },
     "validDomains": [
-        "contoso.com"
+        "yourwebsite.com",
+        "localhost",
+        "https://localhost:3000",
+        "http://localhost:3001"
     ],
     "extensions": [
         {
             "requirements": {
-                "scopes": [
-                    "mail"
-                ],
+                "scopes": ["mail"],
                 "capabilities": [
                     {
                         "name": "Mailbox",
@@ -54,14 +59,6 @@
             },
             "runtimes": [
                 {
-                    "requirements": {
-                        "capabilities": [
-                            {
-                                "name": "Mailbox",
-                                "minVersion": "1.3"
-                            }
-                        ]
-                    },
                     "id": "TaskPaneRuntime",
                     "type": "general",
                     "code": {
@@ -87,25 +84,38 @@
                     "lifetime": "short",
                     "actions": [
                         {
-                            "id": "action",
+                            "id": "ActionButton",
                             "type": "executeFunction",
-                            "displayName": "action"
+                            "displayName": "Categorize/Assign"
+                        }
+                    ]
+                },
+                {
+                    "id": "FormRuntime",
+                    "type": "general",
+                    "code": {
+                        "page": "https://localhost:3000/form.html"
+                    },
+                    "lifetime": "short",
+                    "actions": [
+                        {
+                            "id": "OpenForm",
+                            "type": "openPage",
+                            "displayName": "Open Contact Form"
                         }
                     ]
                 }
             ],
             "ribbons": [
                 {
-                    "contexts": [
-                        "mailRead"
-                    ],
+                    "contexts": ["mailRead"],
                     "tabs": [
                         {
                             "builtInTabId": "TabDefault",
                             "groups": [
                                 {
                                     "id": "msgReadGroup",
-                                    "label": "Contoso Add-in",
+                                    "label": "Capstone Add-in",
                                     "icons": [
                                         {
                                             "size": 16,
@@ -124,7 +134,7 @@
                                         {
                                             "id": "msgReadOpenPaneButton",
                                             "type": "button",
-                                            "label": "Capstone Add-in",
+                                            "label": "Open Task Pane",
                                             "icons": [
                                                 {
                                                     "size": 16,
@@ -140,8 +150,8 @@
                                                 }
                                             ],
                                             "supertip": {
-                                                "title": "Capstone Add-in",
-                                                "description": "Opens a pane displaying all available properties."
+                                                "title": "Open Task Pane",
+                                                "description": "Opens the task pane to generate reports."
                                             },
                                             "actionId": "TaskPaneRuntimeShow"
                                         },
@@ -165,9 +175,33 @@
                                             ],
                                             "supertip": {
                                                 "title": "Categorize/Assign",
-                                                "description": "Perform an action when clicked."
+                                                "description": "Categorize or assign emails to a user."
                                             },
-                                            "actionId": "action"
+                                            "actionId": "ActionButton"
+                                        },
+                                        {
+                                            "id": "OpenFormButton",
+                                            "type": "button",
+                                            "label": "Open Contact Form",
+                                            "icons": [
+                                                {
+                                                    "size": 16,
+                                                    "url": "https://localhost:3000/assets/icon-16.png"
+                                                },
+                                                {
+                                                    "size": 32,
+                                                    "url": "https://localhost:3000/assets/icon-32.png"
+                                                },
+                                                {
+                                                    "size": 80,
+                                                    "url": "https://localhost:3000/assets/icon-80.png"
+                                                }
+                                            ],
+                                            "supertip": {
+                                                "title": "Submit a Contact Form",
+                                                "description": "Opens a form where you can submit your details."
+                                            },
+                                            "actionId": "OpenForm"
                                         }
                                     ]
                                 }

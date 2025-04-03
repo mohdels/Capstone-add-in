@@ -3,6 +3,7 @@
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
 
 const urlDev = "https://localhost:3000/";
 const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
@@ -92,6 +93,10 @@ module.exports = async (env, options) => {
         type: "https",
         options: env.WEBPACK_BUILD || options.https !== undefined ? options.https : await getHttpsOptions(),
       },
+      static: {
+        directory: path.join(__dirname, "src"),
+      },
+      historyApiFallback: true,
       port: process.env.npm_package_config_dev_server_port || 3000,
     },
   };
