@@ -101,7 +101,7 @@ function renderEmailsPerDay(data) {
     countMap[day] = (countMap[day] || 0) + 1;
   });
 
-  renderBarChart("Emails Sent Each Day", countMap);
+  renderBarChart("Emails Received Each Day", countMap);
 }
 
 
@@ -234,7 +234,7 @@ document.getElementById("download-single-pdf").addEventListener("click", () => {
   // Metadata (no emojis, use consistent font)
   pdf.setFontSize(12);
   pdf.text(`Date Range: ${start} to ${end}`, 10, 15);
-  pdf.text(`Group by Conversation ID: ${groupBy}`, 10, 23);
+  pdf.text(`Count replies to email as one email: ${groupBy}`, 10, 23);
 
   // Chart Title
   pdf.setFontSize(16);

@@ -84,4 +84,4 @@ def category_change():
     return '', 204  # 204 No Content response
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=3001)
+    app.run(ssl_context=('cert.pem', 'key.pem'), port=3001)

@@ -1,3 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Outlook Add-in</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="./taskpane.js" type="module"></script>
+  <link rel="stylesheet" href="./taskpane.css" />
+</head>
 <body>
   <div class="container">
     <h1>Office Support for Not-for-Profit Companies</h1>
@@ -12,4 +21,15 @@
       <button id="open-report-btn">Open Report Generator</button>
     </div>
   </div>
+
+  <script type="module">
+    document.getElementById("open-form-btn").onclick = () => {
+      window.location.href = "https://localhost:3000/form.html";
+    };
+
+    document.getElementById("open-report-btn").onclick = () => {
+      window.location.href = "https://localhost:3000/report.html"; // Or taskpane.html if you're reusing it
+    };
+  </script>
 </body>
+</html>

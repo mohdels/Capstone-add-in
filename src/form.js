@@ -1,5 +1,3 @@
-import '../assets/contactform-imec-magazine_1.jpg';
-import './form.css'
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("contact-form");
@@ -22,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
   
       try {
-        const response = await fetch("http://localhost:3001/send-email", {
+        const response = await fetch("https://localhost:3001/send-email", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"

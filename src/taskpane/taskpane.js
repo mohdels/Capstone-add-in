@@ -1,6 +1,6 @@
 import './taskpane.css';
 
-window.addEventListener("DOMContentLoaded", () => {
+Office.onReady(() => {
     document.getElementById("open-form-btn").onclick = () => {
       window.open("https://localhost:3000/form.html", "_blank");
     };
@@ -9,4 +9,3 @@ window.addEventListener("DOMContentLoaded", () => {
       window.open("https://localhost:3000/report.html", "_blank");
     };
   });
-  
