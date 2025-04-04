@@ -24,6 +24,7 @@ def send_email():
         category = data.get('category')
         submission_context = data.get('submissionContext')
         description = data.get('description')
+        date = data.get('date')
 
         body = f"""
         New Form Submission:
@@ -31,6 +32,7 @@ def send_email():
         Name: {name}
         Email: {email}
         Phone: {phone}
+        Date: {date}
         Category: {category}
         In-person/phone: {submission_context}
         Details: {description}

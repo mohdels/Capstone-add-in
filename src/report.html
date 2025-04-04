@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Generator</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script src="./report.js" type="module"></script>
+  <link rel="stylesheet" href="./report.css" />
+</head>
+<body>
+  <div class="dashboard-container">
+    <h1>Email Insights Dashboard</h1>
+    
+
+    <div class="controls">
+      <label for="visual-select">Select Visual:</label>
+      <select id="visual-select">
+        <option value="daily">Emails Sent Each Day</option>
+        <option value="category">Emails by Category</option>
+        <option value="assignee">Emails by Assignee</option>
+        <option value="attachments">Emails With vs Without Attachments</option>
+      </select>
+
+      <label for="group-select">Group by Conversation ID:</label>
+      <select id="group-select">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <label for="start-date">Start Date:</label>
+      <input type="date" id="start-date" />
+
+      <label for="end-date">End Date:</label>
+      <input type="date" id="end-date" />
+
+      <button id="generate-btn">Generate</button>
+    </div>
+
+    <div class="chart-card">
+      <canvas id="main-chart"></canvas>
+      <button id="download-single-pdf">Download This Chart as PDF</button>
+    </div>
+    
+  </div>
+</body>
+</html>

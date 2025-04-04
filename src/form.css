@@ -101,3 +101,30 @@ select {
     box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
   }
   
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: auto; /* ✅ Enable scrolling */
+  }
+  
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #f4f6f8;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .form-container {
+    width: 100%;
+    max-width: 500px;
+    background-color: #ffffff;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+  

@@ -11,13 +11,15 @@ document.addEventListener("DOMContentLoaded", () => {
         email: document.getElementById("email").value,
         phone: document.getElementById("phone").value,
         category: document.getElementById("category").value,
-        submissionContext: document.getElementById("submissionContext").value, 
+        submissionContext: document.getElementById("submissionContext").value,
+        date: document.getElementById("date").value,
         description: document.getElementById("description").value,
       };
       
+      
   
       try {
-        const response = await fetch("https://localhost:3001/send-email", {
+        const response = await fetch("http://localhost:3001/send-email", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"

@@ -1,38 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Outlook Add-in: Email Reports</title>
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="./taskpane.js" type="module"></script>
-  <link rel="stylesheet" type="text/css" href="./taskpane.css" />
-</head>
 <body>
-  <button id="open-form">Submit Client Form</button>
-  <h1>Email Report Generator</h1>
-  <p>Select a CSV file containing email data to generate the report.</p>
-  <input type="file" id="csv-file" accept=".csv" />
-  <button id="run-report">Generate Report</button>
+  <div class="container">
+    <h1>Office Support for Not-for-Profit Companies</h1>
 
-  <h2>Reports</h2>
-  <div>
-    <h3>Emails Sent Each Day</h3>
-    <canvas id="daily-emails-chart"></canvas>
-  </div>
-  <div>
-    <h3>Emails by Category</h3>
-    <canvas id="emails-by-category-chart"></canvas>
-  </div>
-  <div>
-    <h3>Emails by Assignee</h3>
-    <canvas id="emails-by-assignee-chart"></canvas>
-  </div>
-  <div>
-    <h3>Emails with Attachments</h3>
-    <canvas id="emails-with-attachments-chart"></canvas>
-  </div>
-  <button id="download-pdf">Download PDF Report</button>
-  
+    <div class="section">
+      <p>Fill out the form to handle in-person visits or phone calls.</p>
+      <button id="open-form-btn">Open Form</button>
+    </div>
 
+    <div class="section">
+      <p>Open the report generator to visualize email activity like category breakdown and daily stats.</p>
+      <button id="open-report-btn">Open Report Generator</button>
+    </div>
+  </div>
 </body>
-</html>
