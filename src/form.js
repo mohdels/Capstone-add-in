@@ -1,3 +1,6 @@
+import '../assets/contactform-imec-magazine_1.jpg';
+import './form.css'
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("contact-form");
     const statusMessage = document.getElementById("status");
