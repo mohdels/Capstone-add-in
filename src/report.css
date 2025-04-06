@@ -92,3 +92,23 @@ canvas {
 #download-single-pdf:hover {
   background-color: #005a9e;
 }
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}

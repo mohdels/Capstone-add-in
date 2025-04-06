@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Report Generator</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,37 +13,83 @@
 <body>
   <div class="dashboard-container">
     <h1>Email Insights Dashboard</h1>
-    
 
     <div class="controls">
-      <label for="visual-select">Select Visual:</label>
-      <select id="visual-select">
-        <option value="daily">Emails Received Each Day</option>
-        <option value="category">Emails by Category</option>
-        <option value="assignee">Emails by Assignee</option>
-        <option value="attachments">Emails With vs Without Attachments</option>
-      </select>
-
-      <label for="group-select">Count replies to email as one email:</label>
-      <select id="group-select">
-        <option value="no">No</option>
-        <option value="yes">Yes</option>
-      </select>
-
-      <label for="start-date">Start Date:</label>
-      <input type="date" id="start-date" />
-
-      <label for="end-date">End Date:</label>
-      <input type="date" id="end-date" />
-
-      <button id="generate-btn">Generate</button>
+      <!-- Line 1: Visual selector -->
+      <div class="control-row">
+        <label for="visual-select">Select Visual:</label>
+        <select id="visual-select">
+          <option value="daily">Emails Received Each Day</option>
+          <option value="category">Emails by Category</option>
+          <option value="assignee">Emails by Assignee</option>
+          <option value="attachments">Emails With vs Without Attachments</option>
+        </select>
+      </div>
+    
+      <!-- Line 2: View mode + dynamic date range/month/year -->
+      <div class="control-row">
+        <label for="view-mode">View Mode:</label>
+        <select id="view-mode">
+          <option value="custom">Custom Range</option>
+          <option value="month">Month</option>
+          <option value="year">Year</option>
+        </select>
+    
+        <div id="custom-date-range" class="date-group">
+          <label for="start-date">Start Date:</label>
+          <input type="date" id="start-date" />
+    
+          <label for="end-date">End Date:</label>
+          <input type="date" id="end-date" />
+        </div>
+    
+        <div id="month-picker" class="date-group" style="display: none;">
+          <label for="month-select">Month:</label>
+          <select id="month-select">
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+          </select>
+    
+          <label for="month-year-select">Year:</label>
+          <select id="month-year-select"></select>
+        </div>
+    
+        <div id="year-picker" class="date-group" style="display: none;">
+          <label for="year-select">Year:</label>
+          <select id="year-select"></select>
+        </div>
+      </div>
+    
+      <!-- Line 3: Grouping option -->
+      <div class="control-row">
+        <label for="group-select">Count replies to email as one email:</label>
+        <select id="group-select">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+    
+      <!-- Line 4: Generate button -->
+      <div class="control-row">
+        <button id="generate-btn">Generate</button>
+      </div>
     </div>
+    
 
     <div class="chart-card">
       <canvas id="main-chart"></canvas>
       <button id="download-single-pdf">Download This Chart as PDF</button>
     </div>
-    
   </div>
 </body>
 </html>
