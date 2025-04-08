@@ -26,8 +26,7 @@ def send_email():
         description = data.get('description')
         date = data.get('date')
 
-        body = f"""
-        New Form Submission:
+        body = f"""New Form Submission:
 
         Name: {name}
         Email: {email}
