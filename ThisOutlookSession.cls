@@ -111,11 +111,11 @@ Function CategorizeEmail(mail As Outlook.MailItem) As String
     Set http = CreateObject("MSXML2.XMLHTTP")
 
     ' ? Clean email body before sending
-    json = "{""body"":""" & EscapeJSON(mail.Body) & """}"
+    json = CreateJsonString(mail.Subject, mail.SenderName, mail.Recipients(1).Name, mail.body, mail.conversationID)
 
     ' Send POST request to Python API
     With http
-        .Open "POST", "http://localhost:3001/email", False
+        .Open "POST", "http://localhost:3001/classifier", False
         .setRequestHeader "Content-Type", "application/json"
         .Send json
     End With
@@ -160,7 +160,15 @@ Function EscapeJSON(text As String) As String
     EscapeJSON = Trim(cleanText)
 End Function
 
-
+Function CreateJsonString(title As String, sender As String, receiver As String, body As String, conversationID As String) As String
+    Dim json As String
+    json = "{""subject"":""" & EscapeJsonString(title) & """," & _
+           """sender"":""" & EscapeJsonString(sender) & """," & _
+           """receiver"":""" & EscapeJsonString(receiver) & """," & _
+           """body"":""" & EscapeJsonString(body) & """," & _
+           """conversationID"":""" & EscapeJsonString(conversationID) & """}"
+    CreateJsonString = json
+End Function
 
 
 ' ? Function to retrieve the correct SMTP sender email using PropertyAccessor
