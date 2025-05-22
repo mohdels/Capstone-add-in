@@ -83,4 +83,4 @@ def category_change():
     return '', 204  # 204 No Content response
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=3002)
